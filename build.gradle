@@ -1,0 +1,65 @@
+plugins {
+  id 'java-gradle-plugin'
+  id 'groovy'
+  id 'com.gradle.plugin-publish' version "1.2.1"
+}
+
+repositories {
+  mavenCentral()
+}
+
+java {
+  toolchain {
+    languageVersion = JavaLanguageVersion.of(11)
+  }
+}
+
+group = "to.wetransform"
+version = "1.0.0-SNAPSHOT"
+
+dependencies {
+  implementation 'org.ajoberstar.grgit:grgit-core:5.2.2'
+
+  // Testing
+  testImplementation 'org.junit.jupiter:junit-jupiter-api:5.10.2'
+  testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.10.2'
+
+  testImplementation("org.assertj:assertj-core:3.25.3")
+}
+
+test {
+  useJUnitPlatform()
+}
+
+gradlePlugin {
+  plugins {
+    versionPlugin {
+      id = 'to.wetransform.semantic-release-version'
+      implementationClass = 'to.wetransform.gradle.version.VersionPlugin'
+      displayName = 'semantic-release-version'
+      description = 'Gradle plugin that determines the current version from a file with the last release version and information from Git. Intended to be used with semantic-release.'
+      tags.set(['semver', 'release', 'version', 'semantic-release'])
+    }
+  }
+}
+
+// Add a source set and a task for a functional test suite
+def functionalTest = sourceSets.create('functionalTest')
+gradlePlugin.testSourceSets(functionalTest)
+
+configurations[functionalTest.implementationConfigurationName].extendsFrom(configurations.testImplementation)
+
+def functionalTestTask = tasks.register('functionalTest', Test) {
+  testClassesDirs = functionalTest.output.classesDirs
+  classpath = configurations[functionalTest.runtimeClasspathConfigurationName] + functionalTest.output
+}
+
+tasks.check.configure {
+  // Run the functional tests as part of `check`
+  dependsOn(functionalTestTask)
+}
+
+tasks.wrapper {
+  distributionType = Wrapper.DistributionType.ALL
+  gradleVersion = '8.6'
+}

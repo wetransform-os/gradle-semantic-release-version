@@ -1,0 +1,12 @@
+name: Check
+
+on:
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  check:
+    uses: wetransform/gha-workflows/.github/workflows/gradle-library-check.yml@master
+    with:
+      java-version: 11

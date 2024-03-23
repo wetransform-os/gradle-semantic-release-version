@@ -1,0 +1,17 @@
+---
+preset: conventionalcommits
+branches: main
+
+plugins:
+    # https://github.com/semantic-release/commit-analyzer?tab=readme-ov-file#configuration
+  - - "@semantic-release/commit-analyzer"
+  - - "@semantic-release/release-notes-generator"
+  - "@semantic-release/changelog"
+  - - "@semantic-release/exec"
+    - publishCmd: ./gradlew publishPlugins
+    #  prepareCmd: echo "${nextRelease.version}" > version.txt # TODO set via plugin
+  - - "@semantic-release/git"
+    - assets:
+        - CHANGELOG.md
+      #  - version.txt
+  - "@semantic-release/github"

@@ -1,0 +1,77 @@
+---
+name: Release
+
+"on":
+  workflow_dispatch:
+  push:
+    branches: [main]
+
+env:
+  # renovate: datasource=npm depName=@semantic-release/changelog
+  SEMANTIC_RELEASE_CHANGELOG_VERSION: 6.0.3
+
+  # renovate: datasource=npm depName=@semantic-release/exec
+  SEMANTIC_RELEASE_EXEC_VERSION: 6.0.3
+
+  # renovate: datasource=npm depName=@semantic-release/git
+  SEMANTIC_RELEASE_GIT_VERSION: 10.0.1
+
+  # renovate: datasource=npm depName=conventional-changelog-conventionalcommits
+  CONVENTIONAL_CHANGELOG_CONVENTIONALCOMMITS_VERSION: 6.1.0
+
+jobs:
+  release:
+    name: Release
+    runs-on: ubuntu-latest
+    concurrency: ${{ github.workflow }}-release
+
+    outputs:
+      release-published: ${{ steps.release.outputs.new_release_published }}
+      release-version: ${{ steps.release.outputs.new_release_version }}
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4.1.1
+        with:
+          persist-credentials: false
+
+      - name: Setup Java
+        uses: actions/setup-java@387ac29b308b003ca37ba93a6cab5eb57c8f5f93 # v4.0.0
+        with:
+          distribution: temurin
+          java-version: 11
+
+      - name: Setup Gradle
+        uses: gradle/gradle-build-action@87a9a15658c426a54dd469d4fc7dc1a73ca9d4a6 # v2.10.0
+
+      - name: Release
+        id: release
+        uses: cycjimmy/semantic-release-action@61680d0e9b02ff86f5648ade99e01be17f0260a4 # v4.0.0
+        env:
+          # Permissions needed
+          #   contents: write
+          #   issues: write
+          #   pull-requests: write
+          GITHUB_TOKEN: ${{ secrets.SEMANTIC_RELEASE_GITHUB_TOKEN }}
+          GIT_AUTHOR_NAME: wetransform Bot
+          GIT_AUTHOR_EMAIL: 113353961+wetransformer@users.noreply.github.com
+          GIT_COMMITTER_NAME: wetransform Bot
+          GIT_COMMITTER_EMAIL: 113353961+wetransformer@users.noreply.github.com
+          RUNNER_DEBUG: 1
+          # For Gradle execution
+          ORG_GRADLE_PROJECT_gradle.publish.key: ${{ secrets.GRADLE_PUBLISH_KEY }}
+          ORG_GRADLE_PROJECT_gradle.publish.secret: ${{ secrets.GRADLE_PUBLISH_SECRET }}
+        with:
+          # dry_run: true
+          semantic_version: 21.1.2
+
+          extra_plugins:
+            "@semantic-release/changelog@\
+            ${{ env.SEMANTIC_RELEASE_CHANGELOG_VERSION }} \
+            @semantic-release/exec@\
+            ${{ env.SEMANTIC_RELEASE_EXEC_VERSION }} \
+            @semantic-release/git@\
+            ${{ env.SEMANTIC_RELEASE_GIT_VERSION }} \
+            conventional-changelog-conventionalcommits@\
+            ${{ env.CONVENTIONAL_CHANGELOG_CONVENTIONALCOMMITS_VERSION }} \
+            "

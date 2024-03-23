@@ -32,6 +32,9 @@ test {
 }
 
 gradlePlugin {
+  def githubUrl = 'https://github.com/wetransform-os/gradle-semantic-release-version'
+  website = githubUrl
+  vcsUrl = githubUrl
   plugins {
     versionPlugin {
       id = 'to.wetransform.semantic-release-version'

@@ -44,12 +44,23 @@ class VersionPlugin implements Plugin<Project> {
 
   String determineVersion(Project project, File versionFile, File gitDir) {
     // read version from file
-    if (!versionFile.exists()) {
+    def releaseVersion = null
+    if (versionFile.exists()) {
+      releaseVersion = versionFile.text.trim()
+    }
+
+    //TODO parse/verify version
+
+    if (!releaseVersion) {
       // assume initial snapshot
-      project.logger.info("Version file does not exists, assuming 1.0.0-SNAPSHOT")
+      project.logger.info("Version file does not exist or contains no version, assuming 1.0.0-SNAPSHOT")
       return '1.0.0-SNAPSHOT'
     }
-    def releaseVersion = versionFile.text.trim()
+
+    if ('true'.equalsIgnoreCase(System.getenv('RELEASE'))) {
+      // force release version (e.g if repo is dirty during release in CI)
+      return releaseVersion
+    }
 
     def dirty = false
     def tagOnCurrentCommit = false

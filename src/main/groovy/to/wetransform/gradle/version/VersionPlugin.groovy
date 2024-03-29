@@ -4,6 +4,9 @@ import org.gradle.api.Plugin;
 import org.gradle.api.Project;
 
 class VersionPlugin implements Plugin<Project> {
+
+  private static def SEM_VER_REGEX = /(\d+)\.(\d+)\.(\d+)/
+
   void apply(Project project) {
     //XXX not sure how to easiest use the service - instead the repo is opened manually
     // project.apply(plugin: 'org.ajoberstar.grgit.service')
@@ -31,6 +34,19 @@ class VersionPlugin implements Plugin<Project> {
       }
     }
 
+    project.task('verifyReleaseVersion') {
+      group 'Version'
+      description 'Check if a release version is configured, otherwise (if the version is a -SNAPSHOT version) fail'
+
+      doLast {
+        def version = project.version
+
+        assert version
+        assert !version.endsWith('-SNAPSHOT')
+        assert version =~ SEM_VER_REGEX
+      }
+    }
+
     // set version
 
     project.afterEvaluate {
@@ -47,9 +63,15 @@ class VersionPlugin implements Plugin<Project> {
     def releaseVersion = null
     if (versionFile.exists()) {
       releaseVersion = versionFile.text.trim()
-    }
 
-    //TODO parse/verify version
+      // verify version
+      if (releaseVersion) {
+        def matcher = releaseVersion =~ SEM_VER_REGEX
+        if (!matcher) {
+          throw new IllegalStateException("Provided version for last release is not a valid semantic version: $releaseVersion")
+        }
+      }
+    }
 
     if (!releaseVersion) {
       // assume initial snapshot
@@ -86,7 +108,7 @@ class VersionPlugin implements Plugin<Project> {
     }
     else {
       // build snapshot version with next minor version
-      def matcher = releaseVersion =~ /(\d+)\.(\d+)\.(\d+)/
+      def matcher = releaseVersion =~ SEM_VER_REGEX
       if (matcher) {
         project.logger.info("Current commit is not tagged or repository is dirty, using snapshot version based on last release")
 

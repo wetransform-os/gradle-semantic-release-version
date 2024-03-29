@@ -10,6 +10,7 @@ plugins:
   - - "@semantic-release/exec"
     - publishCmd: ./gradlew publishPlugins
       prepareCmd: ./gradlew "-PnewVersion=${nextRelease.version}" setReleaseVersion
+      verifyReleaseCmd: ./gradlew verifyReleaseVersion
   - - "@semantic-release/git"
     - assets:
         - CHANGELOG.md

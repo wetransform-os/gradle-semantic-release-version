@@ -9,9 +9,9 @@ plugins:
   - "@semantic-release/changelog"
   - - "@semantic-release/exec"
     - publishCmd: ./gradlew publishPlugins
-    #  prepareCmd: echo "${nextRelease.version}" > version.txt # TODO set via plugin
+      prepareCmd: ./gradlew "-PnewVersion=${nextRelease.version}" setReleaseVersion
   - - "@semantic-release/git"
     - assets:
         - CHANGELOG.md
-      #  - version.txt
+        - version.txt
   - "@semantic-release/github"

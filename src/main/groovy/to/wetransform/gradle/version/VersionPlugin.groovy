@@ -1,5 +1,6 @@
 package to.wetransform.gradle.version;
 
+import java.util.function.BiPredicate
 import org.gradle.api.Plugin;
 import org.gradle.api.Project;
 
@@ -53,12 +54,14 @@ class VersionPlugin implements Plugin<Project> {
       if(it.version != Project.DEFAULT_VERSION) {
         throw new IllegalStateException("Version may not be configured if version plugin is applied")
       } else {
-        it.version = determineVersion(it, it.versionConfig.versionFile, it.versionConfig.gitDir)
+        it.version = determineVersion(
+          it, it.versionConfig.versionFile, it.versionConfig.gitDir, it.versionConfig.verifyTag
+        )
       }
     }
   }
 
-  String determineVersion(Project project, File versionFile, File gitDir) {
+  String determineVersion(Project project, File versionFile, File gitDir, BiPredicate<String, String> verifyTag) {
     // read version from file
     def releaseVersion = null
     if (versionFile.exists()) {
@@ -79,11 +82,6 @@ class VersionPlugin implements Plugin<Project> {
       return '1.0.0-SNAPSHOT'
     }
 
-    if ('true'.equalsIgnoreCase(System.getenv('RELEASE'))) {
-      // force release version (e.g if repo is dirty during release in CI)
-      return releaseVersion
-    }
-
     def dirty = false
     def tagOnCurrentCommit = false
     def grgit
@@ -97,12 +95,22 @@ class VersionPlugin implements Plugin<Project> {
       dirty = !grgit.status().isClean()
       def currentCommit = grgit.head().id
       tagOnCurrentCommit = grgit.tag.list().findAll { tag ->
-        tag.commit.id == currentCommit
+        tag.commit.id == currentCommit && verifyTag.test(tag.name, releaseVersion)
       }
     }
+
+    if ('true'.equalsIgnoreCase(System.getenv('RELEASE'))) {
+      // force release version if repo is dirty (e.g. during release in CI)
+      // but still verify tag
+      if (tagOnCurrentCommit) {
+        return releaseVersion
+      }
+      else {
+        throw new IllegalStateException("There is no matching tag for the configured release version $releaseVersion")
+      }
+    }
+
     if (tagOnCurrentCommit && !dirty) {
-      //TODO check tags?
-      //XXX for now assume tag represents release
       project.logger.info("Current commit is tagged and repository clean, using release version specified in file: $releaseVersion")
       releaseVersion
     }

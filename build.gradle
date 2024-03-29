@@ -2,6 +2,7 @@ plugins {
   id 'java-gradle-plugin'
   id 'groovy'
   id 'com.gradle.plugin-publish' version "1.2.1"
+  id 'to.wetransform.semantic-release-version' version '1.0.0'
 }
 
 repositories {
@@ -15,7 +16,6 @@ java {
 }
 
 group = "to.wetransform"
-version = "1.0.0"
 
 dependencies {
   implementation 'org.ajoberstar.grgit:grgit-core:5.2.2'

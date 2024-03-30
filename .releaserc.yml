@@ -8,9 +8,15 @@ plugins:
   - - "@semantic-release/release-notes-generator"
   - "@semantic-release/changelog"
   - - "@semantic-release/exec"
-    - publishCmd: ./gradlew publishPlugins
+    - # verifyRelease - Tag has not been created (is cretaed after prepare) and version
+      # has not been set at this point, so verification is not possible
+      # verifyReleaseCmd: ./gradlew verifyReleaseVersion
+
+      # prepare - set release version
       prepareCmd: ./gradlew "-PnewVersion=${nextRelease.version}" setReleaseVersion
-      verifyReleaseCmd: ./gradlew verifyReleaseVersion
+
+      # publish - verify that version is release version and perform publishing tasks
+      publishCmd: ./gradlew verifyReleaseVersion publishPlugins
   - - "@semantic-release/git"
     - assets:
         - CHANGELOG.md

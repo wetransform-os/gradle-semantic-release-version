@@ -66,3 +66,15 @@ tasks.wrapper {
   distributionType = Wrapper.DistributionType.ALL
   gradleVersion = '8.6'
 }
+
+task('verifyReleaseVersion') {
+  //FIXME remove task once plugin could be updated
+
+  doLast {
+    def version = project.version
+
+    assert version
+    assert !version.endsWith('-SNAPSHOT')
+    // assert version =~ SEM_VER_REGEX
+  }
+}

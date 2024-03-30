@@ -1,0 +1,60 @@
+{
+  $schema: "https://docs.renovatebot.com/renovate-schema.json",
+  extends: [ // default presets see https://docs.renovatebot.com/presets-default/
+    "config:recommended",
+    "helpers:pinGitHubActionDigestsToSemver",
+    "security:openssf-scorecard",
+    "group:allNonMajor",
+    ":enableVulnerabilityAlertsWithLabel(security)",
+  ],
+  labels: [
+    "renovate",
+    "renovate/{{updateType}}",
+  ],
+  packageRules: [
+    {
+      description: "Update renovatebot/github-action minor/patch updates on Sundays",
+      matchPackageNames: ["renovatebot/github-action"],
+      matchUpdateTypes: ["minor", "patch"],
+      schedule: ["* * * * 0"],
+    },
+  ],
+  customManagers: [
+    {
+      description: "Update semantic-release in GitHub Action workflows",
+      customType: "regex",
+      fileMatch: ["^\\.github\\/(actions|workflows)\\/.+\\.ya?ml$"],
+      matchStrings: [
+        "\
+semantic_version\\s*:\\s*(\"|')?(?<currentValue>.+)(\"|')?\
+(\\s+|\\s+.*)"
+      ],
+      datasourceTemplate: "npm",
+      depNameTemplate: "semantic-release"
+    },
+    {
+      description: "Any other file with dependencies",
+      customType: "regex",
+      fileMatch: [
+        "(^workflow-templates|\\.github/workflows)/[^/]+\\.ya?ml$",
+      ],
+      matchStrings: [
+        "\
+.*renovate:\
+\\sdatasource=(?<datasource>.*?)\
+\\sdepName=(?<depName>.*?)\
+(\\sversioning=(?<versioning>.*?))?\
+\n.*(version|Version|VERSION)\\s*(:=|=|:)\\s*\"?(?<currentValue>.*?)\
+(@(?<currentDigest>sha256:[a-f0-9]+))?\"?\
+(\\s+|\\s+.*)"
+      ],
+      versioningTemplate: "\
+{{#if versioning}}\
+{{{versioning}}}\
+{{else}}\
+semver-coerced\
+{{/if}}"
+    },
+  ],
+  separateMinorPatch: false,
+}

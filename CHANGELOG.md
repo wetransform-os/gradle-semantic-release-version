@@ -1,3 +1,14 @@
+## [2.0.0](https://github.com/wetransform-os/gradle-semantic-release-version/compare/v1.1.0...v2.0.0) (2024-04-09)
+
+
+### ⚠ BREAKING CHANGES
+
+* by default determine version from Git tags
+
+### Features
+
+* by default determine version from Git tags ([4bc9a13](https://github.com/wetransform-os/gradle-semantic-release-version/commit/4bc9a13644f29c36d88417f49f5a4b5edf7c3e91))
+
 ## [1.1.0](https://github.com/wetransform-os/gradle-semantic-release-version/compare/v1.0.0...v1.1.0) (2024-03-30)
 
 

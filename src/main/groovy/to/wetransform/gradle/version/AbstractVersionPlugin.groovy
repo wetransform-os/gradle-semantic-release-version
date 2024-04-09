@@ -1,0 +1,194 @@
+package to.wetransform.gradle.version;
+
+import java.util.function.BiPredicate
+import org.gradle.api.Plugin;
+import org.gradle.api.Project;
+
+abstract class AbstractVersionPlugin implements Plugin<Project> {
+
+  private static def SEM_VER_REGEX = /^(\d+)\.(\d+)\.(\d+)$/
+
+  private static def SEM_VER_EXTRACT_REGEX = /((\d+)\.(\d+)\.(\d+))$/
+
+  public static def DEFAULT_SNAPSHOT = '1.0.0-SNAPSHOT'
+
+  private final boolean allowConfiguration
+
+  protected AbstractVersionPlugin(boolean allowConfiguration) {
+    this.allowConfiguration = allowConfiguration
+  }
+
+  void apply(Project project) {
+    //XXX not sure how to easiest use the service - instead the repo is opened manually
+    // project.apply(plugin: 'org.ajoberstar.grgit.service')
+
+    // register extension
+    VersionExtension extension
+    if (allowConfiguration) {
+      extension = project.extensions.create('versionConfig', VersionExtension, project)
+    }
+    else {
+      extension = new VersionExtension(project)
+    }
+
+    // define tasks
+    project.task('showVersion') {
+      group 'Version'
+      description 'Print current project version'
+
+      doLast {
+        println "Version: ${project.version}"
+      }
+    }
+
+    if (allowConfiguration || extension.useVersionFile) {
+      project.task('setReleaseVersion') {
+        group 'Version'
+        description 'Set a new release version (write to version file), provide version to set as Gradle property `newVersion`'
+
+        doLast {
+          def versionFile = project.versionConfig.versionFile
+          versionFile.text = project.properties['newVersion']
+        }
+      }
+    }
+
+    project.task('verifyReleaseVersion') {
+      group 'Version'
+      description 'Check if a release version is configured, otherwise (if the version is a -SNAPSHOT version) fail'
+
+      doLast {
+        def version = project.version
+
+        assert version
+        assert !version.endsWith('-SNAPSHOT')
+        assert version =~ SEM_VER_REGEX
+      }
+    }
+
+    // set version
+    if (allowConfiguration) {
+      project.afterEvaluate {
+        // apply after evaluate to allow configuring settings
+        applyVersion(it, extension)
+      }
+    }
+    else {
+      // directly apply with defaults
+      applyVersion(project, extension)
+    }
+  }
+
+  void applyVersion(Project project, VersionExtension extension) {
+    if (project.version != Project.DEFAULT_VERSION) {
+      throw new IllegalStateException("Version may not be configured if version plugin is applied")
+    } else {
+      project.version = determineVersion(
+        project, extension.useVersionFile, extension.tagGlobPatterns, extension.versionFile, extension.gitDir, extension.verifyTag
+      )
+    }
+  }
+
+  String determineVersion(Project project, boolean useVersionFile, Iterable<String> tagMatchPatterns, File versionFile, File gitDir, BiPredicate<String, String> verifyTag) {
+    def releaseVersion = null
+    def grgit = null
+
+    if (useVersionFile) {
+      // read version from file
+      if (versionFile.exists()) {
+        releaseVersion = versionFile.text.trim()
+
+        // verify version
+        if (releaseVersion) {
+          def match = releaseVersion ==~ SEM_VER_REGEX
+          if (!match) {
+            throw new IllegalStateException("Provided version for last release is not a valid semantic version: $releaseVersion")
+          }
+        }
+      }
+
+      if (!releaseVersion) {
+        // assume initial snapshot
+        project.logger.info("Version file does not exist or contains no version, assuming ${DEFAULT_SNAPSHOT}")
+        return DEFAULT_SNAPSHOT
+      }
+    } else {
+      // use information from git to determine last version
+      try {
+        grgit = org.ajoberstar.grgit.Grgit.open(dir: gitDir)
+      } catch (Exception e) {
+        project.logger.warn("Could not open Git repository in $gitDir", e)
+      }
+
+      if (!grgit) {
+        project.logger.info("No Git repository found, assuming ${DEFAULT_SNAPSHOT} as version")
+        return DEFAULT_SNAPSHOT
+      }
+
+      def describe = grgit.describe(abbrev: 0, tags: true, match: tagMatchPatterns as List)
+      if (!describe) {
+        // nothing found
+        project.logger.info("No tag found for determining version, assuming ${DEFAULT_SNAPSHOT}")
+        return DEFAULT_SNAPSHOT
+      }
+      else {
+        def matcher = describe =~ SEM_VER_EXTRACT_REGEX
+        if (matcher) {
+          releaseVersion = matcher[0][1]
+        }
+        else {
+          throw new IllegalStateException("Cannot extract release version from tag: $describe")
+        }
+      }
+    }
+
+    def dirty = false
+    def tagOnCurrentCommit = false
+    if (grgit == null) {
+      try {
+        grgit = org.ajoberstar.grgit.Grgit.open(dir: gitDir)
+      } catch (Exception e) {
+        project.logger.warn("Could not open Git repository in $gitDir", e)
+        grgit = null
+      }
+    }
+    if (grgit) {
+      dirty = !grgit.status().isClean()
+      def currentCommit = grgit.head().id
+      tagOnCurrentCommit = grgit.tag.list().findAll { tag ->
+        tag.commit.id == currentCommit && verifyTag.test(tag.name, releaseVersion)
+      }
+    }
+
+    if ('true'.equalsIgnoreCase(System.getenv('RELEASE'))) {
+      // force release version if repo is dirty (e.g. during release in CI)
+      // but still verify tag
+      if (tagOnCurrentCommit) {
+        return releaseVersion
+      }
+      else {
+        throw new IllegalStateException("There is no matching tag for the configured release version $releaseVersion")
+      }
+    }
+
+    if (tagOnCurrentCommit && !dirty) {
+      project.logger.info("Current commit is tagged and repository clean, using release version specified in file: $releaseVersion")
+      releaseVersion
+    }
+    else {
+      // build snapshot version with next minor version
+      def matcher = releaseVersion =~ SEM_VER_REGEX
+      if (matcher) {
+        project.logger.info("Current commit is not tagged or repository is dirty, using snapshot version based on last release")
+
+        def major = matcher[0][1] as int
+        def minor = matcher[0][2] as int
+
+        "${major}.${minor+1}.0-SNAPSHOT"
+      }
+      else {
+        throw new IllegalStateException("Provided version not a semantic version")
+      }
+    }
+  }
+}

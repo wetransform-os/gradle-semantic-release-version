@@ -11,6 +11,18 @@ class VersionExtension {
   }
 
   /**
+   * States if a version file is used to determine the (release) version.
+   * If disabled will solely rely on informaton on Git tags.
+   */
+  boolean useVersionFile = false
+
+  /**
+   * Valid glob patterns for selecting tags when determininig version from Git.
+   * See also https://git-scm.com/docs/git-describe#Documentation/git-describe.txt---matchltpatterngt
+   */
+  Iterable<String> tagGlobPatterns = ["*.*.*"]
+
+  /**
    * Location of the file that holds the last release version, if it exists.
    */
   File versionFile

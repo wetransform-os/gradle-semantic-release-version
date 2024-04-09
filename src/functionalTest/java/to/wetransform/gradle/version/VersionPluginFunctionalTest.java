@@ -28,7 +28,7 @@ public class VersionPluginFunctionalTest {
     BuildResult result = GradleRunner.create()
       .forwardOutput()
       .withPluginClasspath()
-      .withArguments("greet")
+      .withArguments("showVersion")
       .withProjectDir(projectDir)
       .build();
 

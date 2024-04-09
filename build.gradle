@@ -40,7 +40,15 @@ gradlePlugin {
       id = 'to.wetransform.semantic-release-version'
       implementationClass = 'to.wetransform.gradle.version.VersionPlugin'
       displayName = 'semantic-release-version'
-      description = 'Gradle plugin that determines the current version from a file with the last release version and information from Git. Intended to be used with semantic-release.'
+      description = 'Gradle plugin that determines the current release or SNAPSHOT version from Git based on existing tags. Intended to be used with semantic-release.'
+      tags.set(['semver', 'release', 'version', 'semantic-release', 'git'])
+    }
+
+    configurableVersionPlugin {
+      id = 'to.wetransform.semantic-release-version-custom'
+      implementationClass = 'to.wetransform.gradle.version.ConfigurableVersionPlugin'
+      displayName = 'semantic-release-version-custom'
+      description = 'Gradle plugin that determines the current version based on information from Git and optionally a version file. Compared to the semantic-release-version plugin the behavior can be customized.'
       tags.set(['semver', 'release', 'version', 'semantic-release'])
     }
   }

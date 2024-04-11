@@ -1,3 +1,7 @@
+---
+#
+# PLEASE NOTE: Managed workflow - do not change manually
+#
 name: Check commit conventions
 
 on:

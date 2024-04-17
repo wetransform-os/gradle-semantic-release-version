@@ -1,4 +1,6 @@
-package to.wetransform.gradle.version;
+package to.wetransform.gradle.version
+
+import org.gradle.api.artifacts.Dependency;
 
 import java.util.function.BiPredicate
 import org.gradle.api.Plugin;
@@ -47,7 +49,7 @@ abstract class AbstractVersionPlugin implements Plugin<Project> {
         description 'Set a new release version (write to version file), provide version to set as Gradle property `newVersion`'
 
         doLast {
-          def versionFile = project.versionConfig.versionFile
+          def versionFile = extension.versionFile
           versionFile.text = project.properties['newVersion']
         }
       }
@@ -63,6 +65,19 @@ abstract class AbstractVersionPlugin implements Plugin<Project> {
         assert version
         assert !version.endsWith('-SNAPSHOT')
         assert version =~ SEM_VER_REGEX
+
+        // check that there are no SNAPSHOT dependencies - a release should not contain any SNAPSHOT dependencies
+        //TODO make configurable?
+        checkSnapshotDependencies(project, extension)
+      }
+    }
+
+    project.task('verifyNoSnapshotDependencies') {
+      group 'Version'
+      description 'Check that dependencies don\'t use SNAPSHOT versions'
+
+      doLast {
+        checkSnapshotDependencies(project, extension)
       }
     }
 
@@ -86,6 +101,36 @@ abstract class AbstractVersionPlugin implements Plugin<Project> {
       project.version = determineVersion(
         project, extension.useVersionFile, extension.tagGlobPatterns, extension.versionFile, extension.gitDir, extension.verifyTag
       )
+    }
+  }
+
+  /**
+   * Check that there are no SNAPSHOT dependencies.
+   *
+   * @param project the project to check
+   */
+  void checkSnapshotDependencies(Project project, VersionExtension extension) {
+    def matcher = { Dependency d -> d.version?.contains('SNAPSHOT') }
+    def collector = { Dependency d -> "${d.group ?: ''}:${d.name}:${d.version ?: ''}" }
+
+    def message = ""
+
+    def snapshotDependencies = [] as Set
+    project.configurations.each { cfg ->
+      snapshotDependencies += cfg.dependencies?.matching(matcher)?.collect(collector)
+    }
+    if (extension.checkBuildscriptForSnapshotDependencies) {
+      project.buildscript.configurations.each { cfg ->
+        snapshotDependencies += cfg.dependencies?.matching(matcher)?.collect(collector)
+      }
+    }
+    if (snapshotDependencies.size() > 0) {
+      message += "\n\t${project.name}: ${snapshotDependencies}"
+    }
+
+    if (message) {
+      message = "Snapshot dependencies detected: ${message}"
+      throw new IllegalStateException(message)
     }
   }
 

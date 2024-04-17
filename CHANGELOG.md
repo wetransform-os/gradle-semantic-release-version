@@ -1,3 +1,10 @@
+## [2.1.0](https://github.com/wetransform-os/gradle-semantic-release-version/compare/v2.0.0...v2.1.0) (2024-04-17)
+
+
+### Features
+
+* add check if there are SNAPSHOT dependencies ([2ebb3dd](https://github.com/wetransform-os/gradle-semantic-release-version/commit/2ebb3ddf7f591b87a121d4f8d025bf04365b1f4c))
+
 ## [2.0.0](https://github.com/wetransform-os/gradle-semantic-release-version/compare/v1.1.0...v2.0.0) (2024-04-09)
 
 

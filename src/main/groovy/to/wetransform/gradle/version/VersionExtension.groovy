@@ -45,4 +45,9 @@ class VersionExtension {
     }
   }
 
+  /**
+   * Whether to include buildscript dependencies when checking for SNAPSHOT dependencies.
+   */
+  boolean checkBuildscriptForSnapshotDependencies = false
+
 }

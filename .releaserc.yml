@@ -1,24 +1,26 @@
 ---
-preset: conventionalcommits
 branches: main
 
 plugins:
-    # https://github.com/semantic-release/commit-analyzer?tab=readme-ov-file#configuration
   - - "@semantic-release/commit-analyzer"
+    - preset: conventionalcommits
   - - "@semantic-release/release-notes-generator"
+    - preset: conventionalcommits
   - "@semantic-release/changelog"
   - - "@semantic-release/exec"
-    - # verifyRelease - Tag has not been created (is cretaed after prepare) and version
-      # has not been set at this point, so verification is not possible
-      # verifyReleaseCmd: ./gradlew verifyReleaseVersion
+    - # verifyRelease - Tag has not been created (is created after prepare) and version
+      # has not been set at this point, so verification of the version is not possible,
+      # but verification of dependencies
+      # TODO uncomment after switching to 2.1
+      # verifyReleaseCmd: ./gradlew verifyNoSnapshotDependencies
 
-      # prepare - set release version
-      prepareCmd: ./gradlew "-PnewVersion=${nextRelease.version}" setReleaseVersion
+      # prepare - set release version (if using version file)
+      # prepareCmd: ./gradlew "-PnewVersion=${nextRelease.version}" setReleaseVersion
 
       # publish - verify that version is release version and perform publishing tasks
-      publishCmd: ./gradlew verifyReleaseVersion publishPlugins
+      publishCmd: ./gradlew showVersion verifyReleaseVersion publishPlugins
   - - "@semantic-release/git"
     - assets:
         - CHANGELOG.md
-        - version.txt
+        # - version.txt # (if using version file)
   - "@semantic-release/github"

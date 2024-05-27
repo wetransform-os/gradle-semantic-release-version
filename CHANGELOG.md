@@ -1,3 +1,10 @@
+## [2.1.1](https://github.com/wetransform-os/gradle-semantic-release-version/compare/v2.1.0...v2.1.1) (2024-05-27)
+
+
+### Bug Fixes
+
+* **deps:** update dependency org.assertj:assertj-core to v3.26.0 ([17764e2](https://github.com/wetransform-os/gradle-semantic-release-version/commit/17764e28bfe8ef4f03454079def1197ce6ec4076))
+
 ## [2.1.0](https://github.com/wetransform-os/gradle-semantic-release-version/compare/v2.0.0...v2.1.0) (2024-04-17)
 
 

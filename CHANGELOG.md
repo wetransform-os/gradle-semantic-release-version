@@ -1,3 +1,12 @@
+## [2.1.2](https://github.com/wetransform-os/gradle-semantic-release-version/compare/v2.1.1...v2.1.2) (2024-09-05)
+
+### Bug Fixes
+
+* **deps:** update dependency org.assertj:assertj-core to v3.26.3 ([b2db3f8](https://github.com/wetransform-os/gradle-semantic-release-version/commit/b2db3f824048f0a9ef1ee4c6e3021d2387b09112))
+* **deps:** update junit5 monorepo to v5.10.3 ([f803f76](https://github.com/wetransform-os/gradle-semantic-release-version/commit/f803f76ab6c2253fc4c94ceca16822e9ab4498aa))
+* **deps:** update junit5 monorepo to v5.11.0 ([f095774](https://github.com/wetransform-os/gradle-semantic-release-version/commit/f095774dcbe738032132bc0e8fc442ba560d3273))
+* ignore project deps when checking for SNAPSHOT deps ([4702a53](https://github.com/wetransform-os/gradle-semantic-release-version/commit/4702a53465af2e32470c1db8a3384f4d5f2ace9b))
+
 ## [2.1.1](https://github.com/wetransform-os/gradle-semantic-release-version/compare/v2.1.0...v2.1.1) (2024-05-27)
 
 

@@ -42,6 +42,18 @@ jobs:
       - name: Setup Gradle
         uses: gradle/actions/setup-gradle@16bf8bc8fe830fa669c3c9f914d3eb147c629707 # v4.0.1
 
+      - name: Setup NodeJs
+        uses: actions/setup-node@1e60f620b9541d16bece96c5465dc8ee9832be0b # v4.0.3
+        with:
+          node-version: 20
+
+      - name: Determine app token for release
+        uses: actions/create-github-app-token@31c86eb3b33c9b601a1f60f98dcbfd1d70f379b4 # v1.10.3
+        id: app-token
+        with:
+          app-id: ${{ secrets.WE_RELEASE_GITHUB_APP_ID }}
+          private-key: "${{ secrets.WE_RELEASE_GITHUB_PRIVATE_KEY }}"
+
       - name: Release
         id: release
         uses: cycjimmy/semantic-release-action@cb425203a562475bca039ba4dbf90c7f9ac790f4 # v4.1.0
@@ -50,7 +62,7 @@ jobs:
           #   contents: write
           #   issues: write
           #   pull-requests: write
-          GITHUB_TOKEN: ${{ secrets.SEMANTIC_RELEASE_GITHUB_TOKEN }}
+          GITHUB_TOKEN: ${{ steps.app-token.outputs.token }}
           GIT_AUTHOR_NAME: wetransform Bot
           GIT_AUTHOR_EMAIL: 113353961+wetransformer@users.noreply.github.com
           GIT_COMMITTER_NAME: wetransform Bot

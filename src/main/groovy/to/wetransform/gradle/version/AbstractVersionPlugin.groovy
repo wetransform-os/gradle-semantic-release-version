@@ -1,6 +1,7 @@
 package to.wetransform.gradle.version
 
-import org.gradle.api.artifacts.Dependency;
+import org.gradle.api.artifacts.Dependency
+import org.gradle.api.artifacts.ProjectDependency;
 
 import java.util.function.BiPredicate
 import org.gradle.api.Plugin;
@@ -110,7 +111,11 @@ abstract class AbstractVersionPlugin implements Plugin<Project> {
    * @param project the project to check
    */
   void checkSnapshotDependencies(Project project, VersionExtension extension) {
-    def matcher = { Dependency d -> d.version?.contains('SNAPSHOT') }
+    def matcher = { Dependency d ->
+      // exclude project dependencies (we assume they are also managed by the plugin and will automatically change on release)
+      // include if version is SNAPSHOT version
+      !(d instanceof ProjectDependency) && d.version?.contains('SNAPSHOT')
+    }
     def collector = { Dependency d -> "${d.group ?: ''}:${d.name}:${d.version ?: ''}" }
 
     def message = ""

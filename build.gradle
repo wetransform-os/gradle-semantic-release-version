@@ -18,7 +18,7 @@ java {
 group = "to.wetransform"
 
 dependencies {
-  implementation 'org.ajoberstar.grgit:grgit-core:5.2.2'
+  implementation 'org.ajoberstar.grgit:grgit-core:5.3.0'
 
   // Testing
   testImplementation 'org.junit.jupiter:junit-jupiter-api:5.11.1'

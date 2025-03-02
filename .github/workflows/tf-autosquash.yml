@@ -71,17 +71,17 @@ jobs:
       - name: Checkout pull request
         run: gh pr checkout ${{ github.event.issue.number }}
 
+      - name: Set up git
+        run: |
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "github-actions[bot]@users.noreply.github.com"
+
       - name: Remember author and email of last commit
         run: |
           LAST_COMMIT_AUTHOR=$(git log -1 --pretty=format:"%an")
           LAST_COMMIT_EMAIL=$(git log -1 --pretty=format:"%ae")
           echo "LAST_COMMIT_AUTHOR=$LAST_COMMIT_AUTHOR" >> $GITHUB_ENV
           echo "LAST_COMMIT_EMAIL=$LAST_COMMIT_EMAIL" >> $GITHUB_ENV
-
-      - name: Set up git
-        run: |
-          git config --global user.name "github-actions[bot]"
-          git config --global user.email "github-actions[bot]@users.noreply.github.com"
 
       - name: Perform interactive rebase with autosquash
         env:

@@ -1,0 +1,8 @@
+[versions]
+junit-jupiter = "5.13.4"
+assertj = "3.27.4"
+
+[libraries]
+junit-jupiter = { module = "org.junit.jupiter:junit-jupiter", version.ref = "junit-jupiter" }
+junit-platform-launcher = { module = "org.junit.platform:junit-platform-launcher" }
+assertj-core = { module = "org.assertj:assertj-core", version.ref = "assertj" }

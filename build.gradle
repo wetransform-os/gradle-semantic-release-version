@@ -75,10 +75,12 @@ def functionalTest = sourceSets.create('functionalTest')
 gradlePlugin.testSourceSets(functionalTest)
 
 configurations[functionalTest.implementationConfigurationName].extendsFrom(configurations.testImplementation)
+configurations[functionalTest.runtimeOnlyConfigurationName].extendsFrom(configurations.testRuntimeOnly)
 
 def functionalTestTask = tasks.register('functionalTest', Test) {
   testClassesDirs = functionalTest.output.classesDirs
   classpath = configurations[functionalTest.runtimeClasspathConfigurationName] + functionalTest.output
+  useJUnitPlatform()
 }
 
 tasks.check.configure {

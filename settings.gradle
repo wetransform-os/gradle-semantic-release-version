@@ -1,0 +1,12 @@
+pluginManagement {
+  repositories {
+    gradlePluginPortal()
+    maven {
+      url 'https://artifactory.wetransform.to/artifactory/local'
+    }
+  }
+}
+
+plugins {
+  id 'to.wetransform.settings.default' version '2.1.0'
+}

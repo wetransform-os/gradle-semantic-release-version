@@ -1,0 +1,5 @@
+[versions]
+grgit = "5.3.3"
+
+[libraries]
+grgit-core = { module = "org.ajoberstar.grgit:grgit-core", version.ref = "grgit" }

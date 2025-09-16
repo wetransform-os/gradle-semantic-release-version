@@ -2,20 +2,25 @@ plugins {
   id 'java-gradle-plugin'
   id 'groovy'
   id 'com.gradle.plugin-publish' version "2.0.0"
-  id 'to.wetransform.semantic-release-version' version '2.1.2'
+  id 'to.wetransform.conventions' version '2.1.0'
 }
 
 repositories {
   mavenCentral()
 }
 
-java {
-  toolchain {
-    languageVersion = JavaLanguageVersion.of(11)
+wetransform {
+  setup {
+    javaVersion(11)
+    spotless {
+      licenseHeader = APACHE
+    }
+    publish {
+      // leave publishing to publish plugin
+      enableMaven = false
+    }
   }
 }
-
-group = "to.wetransform"
 
 dependencies {
   implementation libs.grgit.core

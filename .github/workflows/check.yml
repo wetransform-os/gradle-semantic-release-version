@@ -7,6 +7,6 @@ on:
 
 jobs:
   check:
-    uses: wetransform/gha-workflows/.github/workflows/gradle-library-check.yml@cf33a255ff268cb2f569e09d241296e341c44e73 # v3.4.5
+    uses: wetransform/gha-workflows/.github/workflows/gradle-library-check.yml@ff134b5acb193725e52cfa8fe713f3631b1b151d # v3.6.0
     with:
       java-version: 17

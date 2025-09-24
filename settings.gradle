@@ -8,5 +8,5 @@ pluginManagement {
 }
 
 plugins {
-  id 'to.wetransform.settings.default' version '2.1.0'
+  id 'to.wetransform.settings.default' version '2.2.0'
 }

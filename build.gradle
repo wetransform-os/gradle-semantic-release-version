@@ -2,7 +2,7 @@ plugins {
   id 'java-gradle-plugin'
   id 'groovy'
   id 'com.gradle.plugin-publish' version "2.1.1"
-  id 'to.wetransform.conventions' version '2.3.0'
+  id 'to.wetransform.conventions' version '3.0.0'
 }
 
 repositories {
